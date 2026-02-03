@@ -1,20 +1,21 @@
 import db from "@/lib/db";
 import { inngest } from "./client";
+import { createGoogleGenerativeAI } from '@ai-sdk/google';
+import { generateText } from 'ai';
 
-export const helloWorld = inngest.createFunction(
-  { id: "hello-world" },
-  { event: "test/hello.world" },
+const google = createGoogleGenerativeAI();
+
+export const executeAi = inngest.createFunction(
+  { id: "execute-ai" },
+  { event: "execute/ai" },
   async ({ event, step }) => {
     await step.sleep("fetching-data", "5s");
-    await step.sleep("transcribing","5s");
-    await step.sleep("summarizing","5s");
-    await step.sleep("generating-content","5s");
-    await step.sleep("saving-content","5s");
-    return db.workflow.create({
-        data: {
-          name: "New Workflow",
-          
-        },
-      });
+    const {text} = await step.ai.wrap("google-gemini-text",generateText,{
+      model : google("gemini-2.5-flash"),
+      system : "You are a helpful assistant.",
+      prompt : "what is java?",
+
+    });
+    return {text}
   },
 );
