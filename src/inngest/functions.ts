@@ -14,6 +14,11 @@ export const executeAi = inngest.createFunction(
       model : google("gemini-2.5-flash"),
       system : "You are a helpful assistant.",
       prompt : "what is java?",
+      experimental_telemetry:{
+        isEnabled : true,
+        recordInputs:true,
+        recordOutputs : true
+      }
 
     });
     return {text}
