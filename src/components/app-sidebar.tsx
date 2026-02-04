@@ -29,6 +29,7 @@ import{
 }from "@/components/ui/sidebar";
 
 import { authClient } from "@/lib/auth-client"
+import { hasUserSubscription } from "@/features/subscription/hooks/use-subscription"
 
 
 const menuItems=[
@@ -61,6 +62,7 @@ const menuItems=[
 export const AppSidebar=()=>{
     const router = useRouter();
     const pathname = usePathname();
+    const {hasActiveSubscription,isLoading} = hasUserSubscription();
     return(
         <Sidebar collapsible="icon">
             <SidebarHeader>
@@ -111,17 +113,18 @@ export const AppSidebar=()=>{
             <SidebarFooter>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <SidebarMenuButton
-                        tooltip="Upgrade to Pro"
-                        onClick={() => {}}
-                        className="gap-x-4 h-10 px-4"
-                        >
-                          <CreditCardIcon />
-                          Upgrade to Pro
-                        </SidebarMenuButton>
+                        {!hasActiveSubscription && !isLoading && <SidebarMenuButton
+                            tooltip="Upgrade to Pro"
+                            onClick={() => {authClient.checkout({slug : "Taskflow-pro"})}}
+                            className="gap-x-4 h-10 px-4"
+                            >
+                                <CreditCardIcon />
+                                Upgrade to Pro
+                            </SidebarMenuButton>
+                        }
                         <SidebarMenuButton
                         tooltip="Billing portal"
-                        onClick={() => {}}
+                        onClick={() => {authClient.customer.portal()}}
                         className="gap-x-4 h-10 px-4"
                         >
                           <CreditCardIcon />

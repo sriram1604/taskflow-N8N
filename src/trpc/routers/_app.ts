@@ -1,11 +1,11 @@
 
 import db from '@/lib/db';
-import { createTRPCRouter, protectedProcedure } from '../init';
+import { createTRPCRouter, premiumProcedure, protectedProcedure } from '../init';
 import { inngest } from '@/inngest/client';
 
 
 export const appRouter = createTRPCRouter({
-  testAi : protectedProcedure
+  testAi : premiumProcedure
   .mutation(async({ctx}) => {
     const data = await inngest.send({
         name : "execute/ai",
