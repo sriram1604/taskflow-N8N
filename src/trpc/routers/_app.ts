@@ -2,32 +2,11 @@
 import db from '@/lib/db';
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from '../init';
 import { inngest } from '@/inngest/client';
+import { workflowRouter } from '@/features/workflows/server/routers';
 
 
 export const appRouter = createTRPCRouter({
-  testAi : premiumProcedure
-  .mutation(async({ctx}) => {
-    const data = await inngest.send({
-        name : "execute/ai",
-        
-      });
-      return {success : true,message : "Model works perfectly",data : data}
-  }),
-  getWorkflows: protectedProcedure
-    .query(({ctx}) => {
-      
-      return db.workflow.findMany();
-    }),
-    createWorkflow: protectedProcedure
-    .mutation(async({ctx}) => {
-      await inngest.send({
-        name : "test/hello.world",
-        data: {
-          email : " sriramvenkatesan1604@gmail.com"
-        }
-      });
-      return {success : true,message : "Workflow created successfully"}
-    }),
+  workflows : workflowRouter,
 });
 // export type definition of API
 export type AppRouter = typeof appRouter;
