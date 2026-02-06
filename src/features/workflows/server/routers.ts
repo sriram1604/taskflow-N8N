@@ -7,7 +7,7 @@ import z from "zod";
 
 
 export const workflowRouter = createTRPCRouter({
-    createWorkflow: premiumProcedure.mutation(({ctx})=>{
+    createWorkflow: protectedProcedure.mutation(({ctx})=>{
         return db.workflow.create({
             data: {
                 name : generateSlug(3),
