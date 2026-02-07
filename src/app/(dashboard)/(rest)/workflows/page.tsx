@@ -15,7 +15,7 @@ const page = async({searchParams} : Props) => {
   await requireAuth();
 
   const params = await loadWorkflowsParams(searchParams);
-  prefetchWorkflows(params);
+  await prefetchWorkflows(params);
   return (
     <WorkflowsContainer>
       <HydrateClient>
