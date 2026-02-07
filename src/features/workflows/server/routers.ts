@@ -42,7 +42,7 @@ export const workflowRouter = createTRPCRouter({
     getOne : protectedProcedure.input(z.object({
         id : z.string(),
     })).query(({ctx,input})=>{
-        return db.workflow.findFirst({
+        return db.workflow.findFirstOrThrow({
             where: {
                 id : input.id,
                 userId : ctx.auth.user.id,
