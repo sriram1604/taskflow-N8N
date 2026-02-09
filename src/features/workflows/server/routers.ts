@@ -3,6 +3,8 @@ import db from "@/lib/db";
 import { createTRPCRouter, premiumProcedure, protectedProcedure } from "@/trpc/init";
 import { generateSlug } from "random-word-slugs";
 import z from "zod";
+import {NodeType} from "@/generated/prisma";
+import type { Node, Edge } from "@xyflow/react";
 
 
 
@@ -12,6 +14,14 @@ export const workflowRouter = createTRPCRouter({
             data: {
                 name : generateSlug(3),
                 userId : ctx.auth.user.id,
+                nodes : {
+                    create : [{
+                        name : "Initial Node",
+                        type : NodeType.INITIAL,
+                        position : { x: 0, y: 0 },
+                        
+                    }],
+                },
             },
         })
     }),
@@ -41,13 +51,39 @@ export const workflowRouter = createTRPCRouter({
     }),
     getOne : protectedProcedure.input(z.object({
         id : z.string(),
-    })).query(({ctx,input})=>{
-        return db.workflow.findFirstOrThrow({
+    })).query(async({ctx,input})=>{
+        const workflow = await db.workflow.findFirstOrThrow({
             where: {
                 id : input.id,
                 userId : ctx.auth.user.id,
+            },  
+            include : {
+                nodes : true,
+                connections : true,
             },
         })
+
+        const nodes : Node[] = workflow.nodes.map((node)=>({
+            id : node.id,
+            type : node.type,
+            position : node.position as {x : number,y : number},
+            data : (node.data as Record<string,unknown>) || {},
+        }))
+        const edges : Edge[] = workflow.connections.map((connection)=>(
+            {
+                id : connection.id,
+                source : connection.fromNodeId,
+                target : connection.toNodeId,
+                sourceHandle : connection.fromOutput,
+                targetHandle : connection.toInput,
+            }
+        ))
+        return {
+            id : workflow.id,
+            name : workflow.name,
+            nodes,
+            edges,
+        }
     }),
     getMany : protectedProcedure
     .input(z.object({
