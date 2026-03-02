@@ -1,6 +1,6 @@
 "use client"
 
-import { type NodeProps, Position } from "@xyflow/react";
+import { type NodeProps, Position, useReactFlow } from "@xyflow/react";
 import type { LucideIcon } from "lucide-react";
 import Image from "next/image";
 import {memo, type ReactNode} from "react";
@@ -10,6 +10,7 @@ import { BaseNode,BaseNodeContent } from "@/components/react-flow/base-node";
 
 import { BaseHandle } from "@/components/react-flow/base-handle";
 import { WorkflowNode } from "@/components/workflow-node";
+import { type NodeStatus, NodeStatusIndicator } from "@/components/react-flow/node-status-indicator";
 
 
 interface BaseExecutionNodeProps extends NodeProps{
@@ -17,7 +18,7 @@ interface BaseExecutionNodeProps extends NodeProps{
     name: string;
     description ?: string;
     children ?: ReactNode;
-    //status ?: NodeStatus;
+    status ?: NodeStatus;
     onSettings ?: () => void;
     onDoubleClick ?: () => void;
 }
@@ -32,10 +33,14 @@ export const BaseExecutionNode = memo((
         children,
         onSettings,
         onDoubleClick,
+        status = "initial" ,
     } : BaseExecutionNodeProps) => {
 
+        const {setNodes,setEdges} = useReactFlow();
+        
         const handleDelete =() => {
-
+            setNodes((nodes)=>nodes.filter((node)=>node.id !== id))
+            setEdges((edges)=>edges.filter((edge)=>edge.source !== id && edge.target !== id))
         }
         return(
             <WorkflowNode
@@ -44,7 +49,8 @@ export const BaseExecutionNode = memo((
                 onDelete={handleDelete}
                 onSettings={onSettings}
             >
-                <BaseNode onDoubleClick={onDoubleClick}>
+                <NodeStatusIndicator status={status} variant="border">
+                <BaseNode status={status} onDoubleClick={onDoubleClick}>
                     <BaseNodeContent>
                         {typeof Icon === "string" ? (
                             <Image src={Icon} alt={name} width={16} height={16}/>
@@ -64,6 +70,7 @@ export const BaseExecutionNode = memo((
                         />
                     </BaseNodeContent>
                 </BaseNode>
+                </NodeStatusIndicator>
             </WorkflowNode>
         )
 })
