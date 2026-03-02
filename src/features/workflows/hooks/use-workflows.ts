@@ -1,7 +1,7 @@
 "use client"
 
-import { useTRPC } from "@/trpc/client"
-import { useMutation, useQueryClient, useSuspenseQuery } from "@tanstack/react-query"
+import { useTRPC, useQueryClient } from "@/trpc/client"
+import { useMutation, useSuspenseQuery } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { toast } from "sonner"
 import { useWorkflowsParams } from "./use-workflows-params"
@@ -67,6 +67,23 @@ export const useUpdateWorkflowName = () => {
         },
         onError : (error) => {
             toast.error(`Error updating workflow : ${error.message}`);
+        }
+    }))
+}
+
+export const useUpdateWorkflow = () => {
+    const queryClient = useQueryClient();
+    const trpc = useTRPC();
+
+    return useMutation(trpc.workflows.update.mutationOptions({
+        onSuccess: (data) => {
+            toast.success(`Workflow ${data.name} saved successfully.`);
+
+            queryClient.invalidateQueries(trpc.workflows.getMany.queryOptions({}))
+            queryClient.invalidateQueries(trpc.workflows.getOne.queryFilter({id : data.id}),)
+        },
+        onError : (error) => {
+            toast.error(`Error saving workflow : ${error.message}`);
         }
     }))
 }
