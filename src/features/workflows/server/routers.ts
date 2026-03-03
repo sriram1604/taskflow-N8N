@@ -6,10 +6,26 @@ import { generateSlug } from "random-word-slugs";
 import z from "zod";
 import {NodeType} from "@/generated/prisma";
 import type { Node, Edge } from "@xyflow/react";
+import { inngest } from "@/inngest/client";
 
 
 
 export const workflowRouter = createTRPCRouter({
+    executeWorkflow : protectedProcedure.input(z.object({
+        id : z.string(),
+    })).mutation(async ({ctx,input})=>{
+        const workflow = await db.workflow.findUniqueOrThrow({
+            where: {
+                id : input.id,
+                userId : ctx.auth.user.id,
+            },
+        });
+        await inngest.send({
+            name : "workflow/execute.workflow",
+            data : {workflowId : input.id, initialData : {}},
+        });
+        return workflow;
+    }),
     createWorkflow: protectedProcedure.mutation(async ({ctx})=>{
         try {
             return await db.workflow.create({
