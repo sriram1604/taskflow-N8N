@@ -28,11 +28,12 @@ import { useEffect } from "react";
 
 
 const formSchema = z.object({
+    variableName : z.string().min(1,"Variable name is required").regex(/^[a-zA-Z_$][a-zA-Z0-9_$]*$/,"Invalid variable name. It must start with a letter or underscore and can contain letters, numbers, and underscores."),
     endpoint : z.string().url("Please enter a valid URL"),
     method : z.enum(["GET", "POST", "PUT", "DELETE", "PATCH"]),
     body : z.string().optional(),
 })
-
+ 
 export type HttpRequestFormValues = z.infer<typeof formSchema>
 
 interface Props{
@@ -52,13 +53,14 @@ export const HttpRequestDialog = (
         const form = useForm<z.infer<typeof formSchema>>({
             resolver: zodResolver(formSchema),
             defaultValues:{
+                variableName:defaultValues.variableName || "",
                 endpoint:defaultValues.endpoint || "",
                 method:defaultValues.method || "GET",
                 body:defaultValues.body || ""
             },
             
         })
-
+        const watchVariableName = form.watch("variableName") || "myApiCall";
         const watchMethod = form.watch("method");
         const shouldShowBody = ["POST", "PUT", "PATCH"].includes(watchMethod);
 
@@ -69,6 +71,7 @@ export const HttpRequestDialog = (
 
         useEffect(() => {
             form.reset({
+                variableName : defaultValues.variableName || "",
                 endpoint:defaultValues.endpoint || "",
                 method:defaultValues.method || "GET",
                 body:defaultValues.body || ""
@@ -87,6 +90,22 @@ export const HttpRequestDialog = (
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmitHandler)} className="space-y-8 mt-4">
                         <div className="space-y-6">
+                            <FormField
+                                control={form.control}
+                                name="variableName"
+                                render={({field}) => (
+                                    <FormItem className="space-y-2">
+                                        <FormLabel>Variable Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="myApiCall" {...field} className="border-1 border-gray-300"/>
+                                        </FormControl>
+                                        <FormDescription>
+                                            Use this variable to access the response in other nodes : {`{{${watchVariableName}.httpResponse.data}}`}
+                                        </FormDescription>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
                             <FormField
                                 control={form.control}
                                 name="endpoint"
