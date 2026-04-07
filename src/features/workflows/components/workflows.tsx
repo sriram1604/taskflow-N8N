@@ -11,6 +11,9 @@ import { SearchXIcon, WorkflowIcon } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Workflow } from "@/generated/prisma"
 
+import { useState } from 'react';
+import { CreateWorkflowDialog } from './create-workflow-dialog';
+
 export const WorkflowsList = () => {
     
     const workflows = useSuspenseWorkflows()
@@ -49,31 +52,18 @@ export const WorkflowsSearch = () => {
 }
 
 export const WorkflowsHeader = ({disabled} : {disabled?:boolean}) => {
-    const createWorkflow = useCreateWorkflow();
-    const {handleError,modal} = useUpgradeModal();
-    const router = useRouter();
+    const [createOpen, setCreateOpen] = useState(false);
 
-    const handleCreate = () => {
-        createWorkflow.mutate(undefined,{
-            onSuccess : (data) => {
-                router.push(`/workflows/${data.id}`)
-            },
-            onError : (error) => {
-                handleError(error);
-            }
-        })
-    }
     return (
         <>
-        {modal}
+            <CreateWorkflowDialog open={createOpen} onOpenChange={setCreateOpen} />
             <EntityHeader
                 title="Workflows"
                 description="Manage your workflows"
                 
                 newButtonLabel="Create Workflow"
                 disabled={disabled}
-                onNew={handleCreate}
-                isCreating={createWorkflow.isPending}
+                onNew={() => setCreateOpen(true)}
             />
         </>
     )
@@ -128,29 +118,15 @@ export const WorkflowsError = () => {
 }
 
 export const WorkflowsEmpty = () => {
-    const createWorkflow = useCreateWorkflow();
-    const {handleError,modal} = useUpgradeModal();
-    const router = useRouter();
-
-    const handleCreate = () => {
-        createWorkflow.mutate(undefined,{
-            
-            onError : (error) => {
-                handleError(error);
-            },
-            onSuccess : (data) => {
-                router.push(`/workflows/${data.id}`)
-            }
-        })
-    }
+    const [createOpen, setCreateOpen] = useState(false);
     
     return (
        <>
-       {modal}
+        <CreateWorkflowDialog open={createOpen} onOpenChange={setCreateOpen} />
         <EmptyView 
             entity="workflows" 
             message="You haven't created any workflows yet. Get started by creating your first workflow"
-            onNew={handleCreate}
+            onNew={() => setCreateOpen(true)}
             
             />
        </>

@@ -7,6 +7,7 @@ import z from "zod";
 import {NodeType} from "@/generated/prisma";
 import type { Node, Edge } from "@xyflow/react";
 import { inngest } from "@/inngest/client";
+import { sendWorkflowExecution } from "@/inngest/utils";
 
 
 
@@ -20,17 +21,22 @@ export const workflowRouter = createTRPCRouter({
                 userId : ctx.auth.user.id,
             },
         });
-        await inngest.send({
-            name : "workflow/execute.workflow",
-            data : {workflowId : input.id, initialData : {}},
-        });
+        
+
+        await sendWorkflowExecution({
+            workflowId : input.id,
+        })
+
+
         return workflow;
     }),
-    createWorkflow: protectedProcedure.mutation(async ({ctx})=>{
+    createWorkflow: protectedProcedure.input(z.object({
+        name: z.string().min(1).max(255),
+    })).mutation(async ({ctx, input})=>{
         try {
             return await db.workflow.create({
                 data: {
-                    name : generateSlug(3),
+                    name : input.name,
                     userId : ctx.auth.user.id,
                     nodes : {
                         create : [{

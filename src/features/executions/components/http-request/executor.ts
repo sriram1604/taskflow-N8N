@@ -76,9 +76,19 @@ export const httpRequestExecutor: NodeExecutor<HttpRequestData> = async ({
 
             const resolve = Handlebars.compile(data.body || "{}")(context);
 
-            JSON.parse(resolve);
+            console.log("Resolved before parse:", resolve);
 
-            options.body = resolve;
+            let parsedBody;
+
+            try {
+            parsedBody = JSON.parse(resolve);
+            } catch (err) {
+            throw new NonRetriableError(
+                `Invalid JSON body after template resolution: ${resolve}`
+            );
+            }
+
+            options.json = parsedBody;
             options.headers = {
                 "Content-Type" : "application/json",
             }
