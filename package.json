@@ -7,6 +7,7 @@
     "build": "next build --turbopack",
     "start": "next start",
     "lint": "biome check",
+    "ngrok:dev": "ngrok http --url=unquibbling-stumpy-chelsie.ngrok-free.dev 3000",
     "format": "biome format --write",
     "inngest:dev": "inngest-cli dev",
     "dev:all": "mprocs"
@@ -96,6 +97,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "@types/toposort": "^2.0.7",
+    "dotenv-cli": "^11.0.0",
     "inngest-cli": "^1.16.1",
     "mprocs": "^0.8.3",
     "postcss-import": "^16.1.1",
